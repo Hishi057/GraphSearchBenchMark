@@ -289,7 +289,7 @@ int main() {
     for(int i = 1; i<= 100; i++){
         int vertex = i * 5000;
         int N = vertex;
-        int M = 0.5 * N * log(N);
+        int M = 0.1 * N * log(N);
         if(generateGraph(N, M)){
             std::cout << "頂点の数: "<< vertex <<" のグラフ生成に成功しました。\n";
         }

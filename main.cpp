@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <stack>
 #include <fstream>
 #include <chrono>
 #include <filesystem>
@@ -12,6 +13,7 @@ struct GraphData
     int M; // 辺の数
     vector<vector<int>> G; //隣接リスト
     int searchDuration = -1; // 探索に要した時間
+    bool isReachable = false; // ゴールできるかどうか
 };
 
 vector<GraphData> graphs; 
@@ -108,38 +110,39 @@ bool BFS(GraphData graph){
 // 再帰的に調べるための関数。
 // flagは経路を辿る用
 //
-bool explore(const GraphData& graph ,int n ,vector<bool>& visited, vector<int>& from){
-    if(visited[n]) return false;
-    visited[n] = true;
+bool DFS(GraphData& graph){
+    int N = graph.N;
+    int M = graph.M;
+    const vector<vector<int>> G = graph.G;
 
-    if(n == graph.N) {
-        return true;
-    }
+    vector<int64_t> dist(N + 1, -1); // 最短距離
+    vector<int> from(N+1, -1); // 最短経路を辿る用
 
-    for(int nv: graph.G[n]){
-        if(!visited[nv]){
-            from[nv] = n;
-            if(explore(graph, nv, visited, from)) return true;
+    stack<int> st;
+
+    dist[1] = 0;
+    st.push(1);
+
+    while (!st.empty())
+    {
+        int v = st.top();
+        st.pop();
+
+        for (int nv : G[v])
+        {
+            if (dist[nv] == -1)
+            {
+                dist[nv] = dist[v] + 1;
+                from[nv] = v;
+                st.push(nv);
+            }
         }
     }
 
-    return false;
-}
-
-bool DFS(const GraphData& graph){
-    bool result;
-    int N = graph.N;
-    int M = graph.M;
-    vector<vector<int>> G = graph.G;
-
-    vector<bool> visited(N+1, false); //無限ループ阻止
-    vector<int> from(N+1, -1); // 最短経路を辿る用
-
-    if(explore(graph, 1, visited, from)){
-        // cout << "最短経路の道筋: " << rebuildPath(1, N, from) << endl;
-        return true;
-    }
-    return false;
+    if(dist[N] == -1) return false;
+    // cout << dist[N] << endl;
+    // cout << "最短経路の道筋: " << rebuildPath(1, N, from) << endl;
+    return true;
 }
 
 //
@@ -154,8 +157,10 @@ GraphData measure(int i){
         GraphData graph = input(filename);
         
         if(DFS(graph)){
+            graph.isReachable = true;
             cout << "スタートからゴールに辿り着けた" << endl;
         }else{
+            graph.isReachable = false;
             cout << "スタートからゴールに辿り着けなかった" << endl;
         }
 
@@ -203,7 +208,7 @@ int main()
     output();
     */
 
-    for(int i = 1;i <= 100000; i++){
+    for(int i = 1;i <= 150000; i++){
         GraphData graph = measure(i);
         if(graph.N != 0) {
             graphs.push_back(graph);
