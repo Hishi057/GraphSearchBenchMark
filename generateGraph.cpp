@@ -136,7 +136,7 @@ int main() {
     std::cout << "グラフを生成します。\n";
 
     for(int i = 1; i<= 100000; i++){
-        int vertex = i * 1000;
+        int vertex = i * 5000;
         if(generateConnectedGraph(vertex, vertex * 1.5)){
             std::cout << "頂点の数: "<< vertex <<" のグラフ生成に成功しました。\n";
         }
