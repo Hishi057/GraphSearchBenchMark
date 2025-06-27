@@ -11,12 +11,12 @@ g++ (Homebrew GCC 14.2.0_1) 14.2.0
 
 ## 概要
 
-以下のAtcoderの問題を元に、グラフ探索アルゴリズムの効率を評価していく。
+以下のAtcoderの問題を元に、グラフ探索アルゴリズムであるBFSとDFSの計算量のオーダーを評価する。
 
 <https://atcoder.jp/contests/abc211/tasks/abc211_d>
 
-`generatedGraph.cpp`ファイルでGraphsファイルにグラフを生成する。
-`BFS.cpp`ファイルで時間を計測して出力する。
+`generatedGraph.cpp`でGraphsファイルにグラフを生成する。
+`main.cpp`で時間を計測して出力する。
 
 ## AI の使用について
 

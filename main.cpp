@@ -11,8 +11,7 @@ struct GraphData
     int N; // 頂点の数
     int M; // 辺の数
     vector<vector<int>> G; //隣接リスト
-    int BFSduration = -1; // BFSでの探索に要した時間
-    int DFSduration = -1; // DFSでの探索に要した時間
+    int searchDuration = -1; // 探索に要した時間
 };
 
 vector<GraphData> graphs; 
@@ -40,10 +39,28 @@ GraphData input(string filename){
 }
 
 //
-// BFSで探索
+// 経路を復元して出力する関数
+//
+string rebuildPath(int start, int goal, vector<int> from){
+    string path = "";
+    int current = goal;
+    path = to_string(current) + "<-";
+    while(true){
+        path += to_string(from[current]);
+        current = from[current];
+        if (current == start || current == -1) break;
+        path += "<-";
+    }
+
+    return path;
+}
+
+//
+// 幅優先探索
+// 最短経路を求めている
 // 辿った経路をstring型で表示させることも可能
 //
-void BFS(GraphData graph){
+bool BFS(GraphData graph){
 
     int N = graph.N;
     int M = graph.M;
@@ -51,7 +68,7 @@ void BFS(GraphData graph){
 
     vector<int64_t> ways(N + 1, 0);  // 最短での到着経路の本数
     vector<int64_t> dist(N + 1, -1); // 最短距離
-    vector<int64_t> from(N+1, -1); // 最短経路を辿る用
+    vector<int> from(N+1, -1); // 最短経路を辿る用
 
     queue<int> que;
 
@@ -80,38 +97,72 @@ void BFS(GraphData graph){
         }
     }
 
-    // スタートからゴールまでの手順を辿って表示する
-    string path = "";
-    if(ways[N] != 0){
-        int current = N;
-        path = to_string(current) + "<-";
-        while(true){
-            path += to_string(from[current]);
-            current = from[current];
-            if (current == 1) break;
-            path += "<-";
+    if(ways[N] == 0) return false;
+    cout << "最短経路の道筋: " << rebuildPath(1, N, from) << endl;
+    return true;
+}
+
+//
+// # 深さ優先探索
+// explore(int N, bool flag)
+// 再帰的に調べるための関数。
+// flagは経路を辿る用
+//
+bool explore(const GraphData& graph ,int n ,vector<bool>& visited, vector<int>& from){
+    if(visited[n]) return false;
+    visited[n] = true;
+
+    if(n == graph.N) {
+        return true;
+    }
+
+    for(int nv: graph.G[n]){
+        if(!visited[nv]){
+            from[nv] = n;
+            if(explore(graph, nv, visited, from)) return true;
         }
     }
 
-    cout << "最短経路の道筋: " << path << endl;
+    return false;
+}
+
+bool DFS(const GraphData& graph){
+    bool result;
+    int N = graph.N;
+    int M = graph.M;
+    vector<vector<int>> G = graph.G;
+
+    vector<bool> visited(N+1, false); //無限ループ阻止
+    vector<int> from(N+1, -1); // 最短経路を辿る用
+
+    if(explore(graph, 1, visited, from)){
+        // cout << "最短経路の道筋: " << rebuildPath(1, N, from) << endl;
+        return true;
+    }
+    return false;
 }
 
 //
 // Graphs/i.txt を入力データとして受け取ったグラフをBFSで探索するのに要した時間を計測。
 //
-GraphData measureBFS(int i){
+GraphData measure(int i){
     string filename = "Graphs/" + to_string(i) + ".txt";
     
     if(filesystem::exists(filename)){
         auto start = chrono::high_resolution_clock::now();
 
         GraphData graph = input(filename);
-        BFS(graph);
+        
+        if(DFS(graph)){
+            cout << "スタートからゴールに辿り着けた" << endl;
+        }else{
+            cout << "スタートからゴールに辿り着けなかった" << endl;
+        }
 
         auto end = chrono::high_resolution_clock::now();
         auto duration = chrono::duration_cast<std::chrono::milliseconds>(end - start);
         cout << i << ": 計測時間(ms): " << duration.count() << endl;
-        graph.BFSduration = duration.count();
+        graph.searchDuration = duration.count();
 
         return graph;
     }else{
@@ -119,16 +170,16 @@ GraphData measureBFS(int i){
     }
 }
 
+
 //
 // 結果をcsvファイルを出力する
 //
 int output(){
     string filename = "result.csv";
     ofstream ofs(filename);
-    ofs << "Vertex,Edge,BFS_Time_ms,DFS_Time_ms\n";
-    
+    ofs << "Vertex,Edge,Time_ms\n";
     for(GraphData g : graphs){
-        ofs << g.N << "," << g.M << "," << g.BFSduration << "," << g.DFSduration << "\n";
+        ofs << g.N << "," << g.M << "," << g.searchDuration << "\n";
     }
 
     ofs.close();
@@ -141,6 +192,7 @@ int output(){
 //
 int main()
 {
+    /*
     int number = 300000;
 
     for(int i = 1;i <= number; i++){
@@ -149,5 +201,16 @@ int main()
     }
 
     output();
+    */
+
+    for(int i = 1;i <= 100000; i++){
+        GraphData graph = measure(i);
+        if(graph.N != 0) {
+            graphs.push_back(graph);
+        }
+    }
+
+
     return 0;
+
 }
