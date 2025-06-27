@@ -124,11 +124,14 @@ GraphData measureBFS(int i){
 //
 int output(){
     string filename = "result.csv";
-    // ofstream ofs(filename);
-    // ofs << "頂点の数,辺の数,計算時間(ms)\n";
+    ofstream ofs(filename);
+    ofs << "Vertex,Edge,BFS_Time_ms,DFS_Time_ms\n";
+    
     for(GraphData g : graphs){
-        cout << g.N << "," << g.M << "," << g.BFSduration << "," << g.DFSduration << endl;
+        ofs << g.N << "," << g.M << "," << g.BFSduration << "," << g.DFSduration << "\n";
     }
+
+    ofs.close();
 
     return 0;
 }
