@@ -156,7 +156,7 @@ GraphData measure(int i){
 
         GraphData graph = input(filename);
         
-        if(DFS(graph)){
+        if(BFS(graph)){
             graph.isReachable = true;
             cout << "スタートからゴールに辿り着けた" << endl;
         }else{
@@ -208,14 +208,14 @@ int main()
     output();
     */
 
-    for(int i = 1;i <= 150000; i++){
+    for(int i = 1;i <= 250000; i++){
         GraphData graph = measure(i);
         if(graph.N != 0) {
             graphs.push_back(graph);
         }
     }
 
+    output();
 
     return 0;
-
 }
